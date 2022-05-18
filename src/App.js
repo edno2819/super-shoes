@@ -2,60 +2,64 @@ import { useEffect, useState, useRef } from 'react';
 import './App.css';
 
 function App() {
-  const [data, setData] = useState([]);
-  const carousel = useRef(null);
+  const [scroll_position, sumScroll] = useState(0)
+  const [datas, RefreshData] = useState([])
+
+
+
+  const getDatasAPI = () => {
+    fetch('http://localhost:3000/static/shoes.json')
+    .then(response => response.json())
+    .then(RefreshData)
+  }
 
   useEffect(() => {
-    fetch('http://localhost:3000/static/shoes.json')
-      .then((response) => response.json())
-      .then(setData);
-  }, []);
+    getDatasAPI()
+  }, [])
 
-  const handleLeftClick = (e) => {
-    e.preventDefault();
-    carousel.current.scrollLeft -= carousel.current.offsetWidth;
-  };
+  const handleScroll = (x) => {
+    sumScroll(scroll_position + x)
+    console.log(scroll_position)
+    const element = document.getElementsByClassName("container")[0];
+    element.scroll({
+      left: scroll_position,
+      behavior: 'smooth',
+    })
+  }
 
-  const handleRightClick = (e) => {
-    e.preventDefault();
-
-    carousel.current.scrollLeft += carousel.current.offsetWidth;
-  };
-
-  if (!data || !data.length) return null;
+  if (!datas || !datas.length) return null;
 
   return (
-    <div className="container">
-      <div className="logo">
-        <img src="/static/images/super-shoes.png" alt="Super Shoes Logo" />
-      </div>
-      <div className="carousel" ref={carousel}>
-        {data.map((item) => {
-          const { id, name, price, oldPrice, image } = item;
+    <div className='carrosel'>
+
+      <div className="container" >
+
+        {datas.map((data) => {
+          const { id, name, price, oldPrice, image } = data;
           return (
-            <div className="item" key={id}>
-              <div className="image">
-                <img src={image} alt={name} />
-              </div>
-              <div className="info">
-                <span className="name">{name}</span>
-                <span className="oldPrice">U$ {oldPrice}</span>
-                <span className="price">U$ {price}</span>
-              </div>
+            <div className='card'>
+              <img src={image} />
+              <span className='title'>{name}</span>
+              <span className='preco-old'>R$ {oldPrice}</span>
+              <button className='button-comprar'>Compre Aqui! {price}</button>
             </div>
-          );
-        })}
+          )
+        })
+        }
+
       </div>
-      <div className="buttons">
-        <button onClick={handleLeftClick}>
-          <img src="/static/images/216151_right_chevron_icon.png" alt="Scroll Left" />
-        </button>
-        <button onClick={handleRightClick}>
-          <img src="/static/images/216151_right_chevron_icon.png" alt="Scroll Right" />
-        </button>
-      </div>
+
+      <button type='button' onClick={() => { handleScroll(-300) }} className='button-scroll'>
+        <img src="/static/images/216151_right_chevron_icon.png" alt="Scroll Left" />
+      </button>
+
+      <button type='button' onClick={() => { handleScroll(300) }} className='button-scroll'>
+        <img src="/static/images/216151_right_chevron_icon.png" alt="Scroll Right" />
+      </button>
+
     </div>
-  );
+
+  )
 }
 
 export default App;
